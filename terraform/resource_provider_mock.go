@@ -1,6 +1,10 @@
 package terraform
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/hashicorp/terraform/config/configschema"
+)
 
 // MockResourceProvider implements ResourceProvider but mocks out all the
 // calls for testing purposes.
@@ -44,6 +48,9 @@ type MockResourceProvider struct {
 	RefreshReturnError             error
 	ResourcesCalled                bool
 	ResourcesReturn                []ResourceType
+	ResourceTypeSchemaCalled       bool
+	ResourceTypeSchemaReturn       *configschema.Block
+	ResourceTypeSchemaReturnError  error
 	ReadDataApplyCalled            bool
 	ReadDataApplyInfo              *InstanceInfo
 	ReadDataApplyDiff              *InstanceDiff
@@ -61,6 +68,9 @@ type MockResourceProvider struct {
 	StopReturnError                error
 	DataSourcesCalled              bool
 	DataSourcesReturn              []DataSource
+	DataSourceSchemaCalled         bool
+	DataSourceSchemaReturn         *configschema.Block
+	DataSourceSchemaReturnError    error
 	ValidateCalled                 bool
 	ValidateConfig                 *ResourceConfig
 	ValidateFn                     func(*ResourceConfig) ([]string, []error)
@@ -218,6 +228,14 @@ func (p *MockResourceProvider) Resources() []ResourceType {
 	return p.ResourcesReturn
 }
 
+func (p *MockResourceProvider) ResourceTypeSchema(name string) (*configschema.Block, error) {
+	p.Lock()
+	defer p.Unlock()
+
+	p.ResourceTypeSchemaCalled = true
+	return p.ResourceTypeSchemaReturn, p.ResourceTypeSchemaReturnError
+}
+
 func (p *MockResourceProvider) ImportState(info *InstanceInfo, id string) ([]*InstanceState, error) {
 	p.Lock()
 	defer p.Unlock()
@@ -294,4 +312,12 @@ func (p *MockResourceProvider) DataSources() []DataSource {
 
 	p.DataSourcesCalled = true
 	return p.DataSourcesReturn
+}
+
+func (p *MockResourceProvider) DataSourceSchema(name string) (*configschema.Block, error) {
+	p.Lock()
+	defer p.Unlock()
+
+	p.DataSourceSchemaCalled = true
+	return p.DataSourceSchemaReturn, p.DataSourceSchemaReturnError
 }
