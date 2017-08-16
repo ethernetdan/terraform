@@ -1,10 +1,17 @@
+## 0.10.2 (August 16, 2017)
+
+BUG FIXES:
+
+* tools/terraform-bundle: Add missing Ui to ProviderInstaller (fix crash) ([#15826](https://github.com/hashicorp/terraform/issues/15826))
+* go-plugin: crash when server emits non-key-value JSON ([go-plugin#43](https://github.com/hashicorp/go-plugin/pull/43))
+
 ## 0.10.1 (August 15, 2017)
 
 BUG FIXES:
 
 * Fix `terraform state rm` and `mv` commands to work correctly with remote state backends ([#15652](https://github.com/hashicorp/terraform/issues/15652))
 * Fix errors when interpolations fail during input ([#15780](https://github.com/hashicorp/terraform/issues/15780))
-* Backoff retried in remote-execution provisioner ([#15772](https://github.com/hashicorp/terraform/issues/15772))
+* Backoff retries in remote-execution provisioner ([#15772](https://github.com/hashicorp/terraform/issues/15772))
 * Load plugins from `~/.terraform.d/plugins/OS_ARCH/` and `.terraformrc` ([#15769](https://github.com/hashicorp/terraform/issues/15769))
 * The `import` command was ignoring the remote state configuration ([#15768](https://github.com/hashicorp/terraform/issues/15768))
 * Don't allow leading slashes in s3 bucket names for remote state ([#15738](https://github.com/hashicorp/terraform/issues/15738))
