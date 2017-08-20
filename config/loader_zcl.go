@@ -104,9 +104,9 @@ func (t *zclConfigurable) Config() (*Config, error) {
 		Type string `zcl:"type,label"`
 		Name string `zcl:"name,label"`
 
-		CountExpr zcl.Expression `zcl:"count,attr"`
-		Provider  *string        `zcl:"provider,attr"`
-		DependsOn *[]string      `zcl:"depends_on,attr"`
+		CountExpr *zcl.Expression `zcl:"count,attr"`
+		Provider  *string         `zcl:"provider,attr"`
+		DependsOn *[]string       `zcl:"depends_on,attr"`
 
 		Lifecycle    *resourceLifecycle `zcl:"lifecycle,block"`
 		Provisioners []provisioner      `zcl:"provisioner,block"`
