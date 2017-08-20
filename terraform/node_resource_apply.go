@@ -3,6 +3,8 @@ package terraform
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform/config/configschema"
+
 	"github.com/hashicorp/terraform/config"
 )
 
@@ -91,7 +93,8 @@ func (n *NodeApplyableResource) evalTreeDataResource(
 	stateId string, info *InstanceInfo,
 	resource *Resource, stateDeps []string) EvalNode {
 	var provider ResourceProvider
-	var config *ResourceConfig
+	var resourceSchema *configschema.Block
+	var resourceConfig *ResourceConfig
 	var diff *InstanceDiff
 	var state *InstanceState
 
@@ -124,14 +127,22 @@ func (n *NodeApplyableResource) evalTreeDataResource(
 				Then: EvalNoop{},
 			},
 
+			&EvalGetResourceSchema{
+				Mode:     config.DataResourceMode,
+				Resource: &resource,
+				Provider: &provider,
+				Output:   &resourceSchema,
+			},
+
 			// We need to re-interpolate the config here, rather than
 			// just using the diff's values directly, because we've
 			// potentially learned more variable values during the
 			// apply pass that weren't known when the diff was produced.
 			&EvalInterpolate{
 				Config:   n.Config.RawConfig.Copy(),
+				Schema:   resourceSchema,
 				Resource: resource,
-				Output:   &config,
+				Output:   &resourceConfig,
 			},
 
 			&EvalGetProvider{
@@ -142,7 +153,7 @@ func (n *NodeApplyableResource) evalTreeDataResource(
 			// Make a new diff with our newly-interpolated config.
 			&EvalReadDataDiff{
 				Info:     info,
-				Config:   &config,
+				Config:   &resourceConfig,
 				Previous: &diff,
 				Provider: &provider,
 				Output:   &diff,
@@ -183,6 +194,7 @@ func (n *NodeApplyableResource) evalTreeManagedResource(
 	var provider ResourceProvider
 	var diff, diffApply *InstanceDiff
 	var state *InstanceState
+	var resourceSchema *configschema.Block
 	var resourceConfig *ResourceConfig
 	var err error
 	var createNew bool
@@ -236,8 +248,15 @@ func (n *NodeApplyableResource) evalTreeManagedResource(
 				},
 			},
 
+			&EvalGetResourceSchema{
+				Mode:     config.ManagedResourceMode,
+				Resource: &resource,
+				Provider: &provider,
+				Output:   &resourceSchema,
+			},
 			&EvalInterpolate{
 				Config:   n.Config.RawConfig.Copy(),
+				Schema:   resourceSchema,
 				Resource: resource,
 				Output:   &resourceConfig,
 			},

@@ -4,12 +4,14 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform/config"
+	"github.com/hashicorp/terraform/config/configschema"
 )
 
 // EvalInterpolate is an EvalNode implementation that takes a raw
 // configuration and interpolates it.
 type EvalInterpolate struct {
 	Config   *config.RawConfig
+	Schema   *configschema.Block
 	Resource *Resource
 	Output   **ResourceConfig
 }
