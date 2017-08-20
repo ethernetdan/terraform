@@ -5,6 +5,8 @@ import (
 	"encoding/gob"
 	"sync"
 
+	"github.com/zclconf/go-zcl/zcl"
+
 	"github.com/hashicorp/hil"
 	"github.com/hashicorp/hil/ast"
 	"github.com/mitchellh/copystructure"
@@ -35,12 +37,38 @@ type RawConfig struct {
 	lock        sync.Mutex
 	config      map[string]interface{}
 	unknownKeys []string
+
+	// Temporary new interface for zcl config parser: this new field are used
+	// instead of "Raw" when the new parser is in use, allowing both the old
+	// and new implementations to co-exist.
+	//
+	// Only one of "Raw" or "body" may be set. When body is set, the rest
+	// of this struct is unused (except Key, if present) since the RawConfig
+	// is just being used to smuggle the zcl.Body through to the experimental
+	// code in the terraform package without changing everything in between.
+	// See the functions in interpolate_zcl.go for the functions that are used
+	// instead of the RawConfig methods in this case.
+	//
+	// This will be simplified in some re-factoring once we're ready to
+	// eliminate the old HCL-based parser.
+	body zcl.Body
 }
 
 // NewRawConfig creates a new RawConfig structure and populates the
 // publicly readable struct fields.
 func NewRawConfig(raw map[string]interface{}) (*RawConfig, error) {
 	result := &RawConfig{Raw: raw}
+	if err := result.init(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// newRawConfigZcl is a temporary alternative interface for the experimental
+// zcl-based parser.
+func newRawConfigZcl(body zcl.Body) (*RawConfig, error) {
+	result := &RawConfig{body: body}
 	if err := result.init(); err != nil {
 		return nil, err
 	}

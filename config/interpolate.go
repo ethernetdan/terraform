@@ -191,9 +191,18 @@ func NewResourceVariable(key string) (*ResourceVariable, error) {
 		mode = DataResourceMode
 		parts = strings.SplitN(key, ".", 4)
 		if len(parts) < 4 {
-			return nil, fmt.Errorf(
-				"%s: data variables must be four parts: data.TYPE.NAME.ATTR",
-				key)
+			// This is a request for the whole object. This only makes sense
+			// for the experimental zcl parsing mode since HIL can't generally
+			// deal with complex structures. Using this with HIL is supported
+			// but will generally be futile due to its limited index operator.
+			return &ResourceVariable{
+				Mode:  mode,
+				Type:  parts[0],
+				Name:  parts[1],
+				Multi: true,
+				Index: -1,
+				key:   key,
+			}, nil
 		}
 
 		// Don't actually need the "data." prefix for parsing, since it's
@@ -203,9 +212,18 @@ func NewResourceVariable(key string) (*ResourceVariable, error) {
 		mode = ManagedResourceMode
 		parts = strings.SplitN(key, ".", 3)
 		if len(parts) < 3 {
-			return nil, fmt.Errorf(
-				"%s: resource variables must be three parts: TYPE.NAME.ATTR",
-				key)
+			// This is a request for the whole object. This only makes sense
+			// for the experimental zcl parsing mode since HIL can't generally
+			// deal with complex structures. Using this with HIL is supported
+			// but will generally be futile due to its limited index operator.
+			return &ResourceVariable{
+				Mode:  mode,
+				Type:  parts[0],
+				Name:  parts[1],
+				Multi: true,
+				Index: -1,
+				key:   key,
+			}, nil
 		}
 	}
 

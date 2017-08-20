@@ -209,7 +209,13 @@ func (t *zclConfigurable) Config() (*Config, error) {
 			}
 		}
 
-		// TODO: provider, provisioners, depends_on, count, and the config itself
+		var err error
+		r.RawConfig, err = newRawConfigZcl(rawR.Config)
+		if err != nil {
+			return nil, err
+		}
+
+		// TODO: provider, provisioners, depends_on, count
 
 		config.Resources = append(config.Resources, r)
 
